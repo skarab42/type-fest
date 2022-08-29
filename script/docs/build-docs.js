@@ -81,11 +81,14 @@ for (const [categoryName, types] of [...typeCategories.entries()].sort()) {
 		markdownDocs += `	[source](source/${name}.d.ts)`;
 
 		for (const [index, example] of examples.entries()) {
+			const buff = Buffer.from('export {};');
+			const data = buff.toString('base64');
 			const source = example.replace(/^`+|`+$/g, '').trim();
-			console.log(source);
+			const code = zlib.deflateSync(data).toString('base64');
+			const link = `https://www.typescriptlang.org/play?#code/${data}`;
+			console.log(data, link);
 			console.log('-------------------------');
-			const code = zlib.inflateSync('export {};').toString('base64');
-			markdownDocs += ` | [example${examples.length > 1 ? index + 1 : ''}](https://www.typescriptlang.org/play?#code/${code})`;
+			markdownDocs += ` | [example${examples.length > 1 ? index + 1 : ''}](${link})`;
 		}
 
 		markdownDocs += '\n\n';

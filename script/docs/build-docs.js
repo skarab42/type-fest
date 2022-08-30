@@ -1,9 +1,8 @@
 /* eslint-disable unicorn/prefer-module */
 const fs = require('fs');
-const zlib = require('zlib');
 const path = require('path');
-const {Buffer} = require('buffer');
 const ts = require('typescript');
+const lzstring = require('lz-string');
 
 // ----------------------------------------------------------------------------
 
@@ -81,13 +80,13 @@ for (const [categoryName, types] of [...typeCategories.entries()].sort()) {
 		markdownDocs += `	[source](source/${name}.d.ts)`;
 
 		for (const [index, example] of examples.entries()) {
-			const buff = Buffer.from('export {};');
-			const data = buff.toString('base64');
 			const source = example.replace(/^`+|`+$/g, '').trim();
-			const code = zlib.deflateSync(data).toString('base64');
-			const link = `https://www.typescriptlang.org/play?#code/${data}`;
-			console.log(data, link);
-			console.log('-------------------------');
+			const code = lzstring.compressToEncodedURIComponent(source);
+			const link = `https://www.typescriptlang.org/play?#code/${code}`;
+			// ...
+			// console.log('>>>', link);
+			// console.log('>>>', source);
+			// console.log('-------------------------');
 			markdownDocs += ` | [example${examples.length > 1 ? index + 1 : ''}](${link})`;
 		}
 

@@ -6,12 +6,15 @@ const lzstring = require('lz-string');
 
 // ----------------------------------------------------------------------------
 
-const outputFile = path.resolve(__dirname, '../../docs.md');
 const entryFile = path.resolve(__dirname, '../../index.d.ts');
 const sourceDirectory = path.resolve(__dirname, '../../source');
 const sourceFileNames = fs.readdirSync(sourceDirectory).map(fileName =>
 	path.resolve(sourceDirectory, fileName).replace(/\\/g, '/'),
-).filter(fileName => fileName.endsWith('.d.ts'));
+	).filter(fileName => fileName.endsWith('.d.ts'));
+	
+const readmeTemplateTag = 'TYPE_FEST_API_CODGEN';
+const readmeFile = path.resolve(__dirname, '../../readme.md');
+const readmeTemplateFile = path.resolve(__dirname, './template/readme.md');
 
 // ----------------------------------------------------------------------------
 
@@ -70,10 +73,18 @@ for (const sourceFileName of sourceFileNames) {
 
 // ----------------------------------------------------------------------------
 
-let markdownDocs = '# API\n\n';
+let markdownDocs = '**Categories:**\n\n';
 
-for (const [categoryName, types] of [...typeCategories.entries()].sort()) {
-	markdownDocs += `## ${categoryName}\n\n`;
+const sortedCategories = [...typeCategories.entries()].sort()
+
+for (const [categoryName, types] of sortedCategories) {
+	markdownDocs += `- [${categoryName}](#${categoryName.toLowerCase().replace(' ', '-')}) (${types.size})\n`;
+}
+
+markdownDocs += `\n`;
+
+for (const [categoryName, types] of sortedCategories) {
+	markdownDocs += `### ${categoryName}\n\n`;
 
 	for (const {name, summary, examples} of types) {
 		markdownDocs += `- \`${name}\` - ${summary}\n\n`;
@@ -83,10 +94,6 @@ for (const [categoryName, types] of [...typeCategories.entries()].sort()) {
 			const source = example.replace(/^`+|`+$/g, '').trim();
 			const code = lzstring.compressToEncodedURIComponent(source);
 			const link = `https://www.typescriptlang.org/play?#code/${code}`;
-			// ...
-			// console.log('>>>', link);
-			// console.log('>>>', source);
-			// console.log('-------------------------');
 			markdownDocs += ` | [example${examples.length > 1 ? index + 1 : ''}](${link})`;
 		}
 
@@ -94,8 +101,10 @@ for (const [categoryName, types] of [...typeCategories.entries()].sort()) {
 	}
 }
 
-// Console.log(markdownDocs);
-fs.writeFileSync(outputFile, markdownDocs);
+// ----------------------------------------------------------------------------
+
+const readmeTemplate = fs.readFileSync(readmeTemplateFile, 'utf8');
+fs.writeFileSync(readmeFile, readmeTemplate.replace(`{{${readmeTemplateTag}}}`, markdownDocs));
 
 // ----------------------------------------------------------------------------
 

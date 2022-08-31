@@ -34,7 +34,7 @@
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "~0.7.0",
 		"expect-type": "^0.13.0",
-		"lz-string": "^1.4.4",
+		"lz-string": "^1.4.4"
 	},
 	"types": "./index.d.ts",
 	"xo": {
